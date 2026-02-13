@@ -1,0 +1,23 @@
+server:
+  service:
+    type: NodePort
+    nodePort: 30090
+
+  extraScrapeConfigs: |
+    - job_name: 'node-app'
+      static_configs:
+        - targets: ['node-app.default.svc.cluster.local:3001']
+
+serverFiles:
+  alerting_rules.yml:
+    groups:
+      - name: node-app-alerts
+        rules:
+          - alert: NodeAppDown
+            expr: up{job="node-app"} == 0
+            for: 1m
+            labels:
+              severity: critical
+            annotations:
+              summary: Node.js app is down
+              description: Node app has been down for more than 1 minute.
